@@ -12,11 +12,9 @@ from mini_av import mini_av_scan_detalhado
 from extrair import extract_from_nfe_xml, valida_cnpj, valida_chave_acesso
 from core.report_llm_pdf import build_llm_executive_pdf
 
-import os
-import requests
+import requests  # <- manter só este import (sem duplicar os)
 
-
-
+# =================== CONFIG REMOTA ===================
 AGENT_URL = (st.secrets.get("AGENT_URL") or os.getenv("AGENT_URL") or "").rstrip("/")
 
 @st.cache_data(ttl=60)
@@ -25,7 +23,9 @@ def ping_agent():
         return False, "AGENT_URL vazio (configure em Secrets)"
     try:
         r = requests.get(f"{AGENT_URL}/health", timeout=10)
-        return (r.ok, (r.json() if r.headers.get("content-type","").startswith("application/json") else r.text))
+        ok = r.ok
+        detail = r.json() if r.headers.get("content-type", "").startswith("application/json") else r.text
+        return ok, detail
     except Exception as e:
         return False, str(e)
 
@@ -48,7 +48,6 @@ if ok:
 else:
     st.sidebar.error("Offline ❌")
     st.sidebar.write(info)
-
 
 # ======== Auditoria (status visível) ========
 AUDITORIA_ERR = ""
@@ -101,10 +100,6 @@ try:
 except Exception:
     def cap_label(x): return ""
     def ncm_to_capitulo(x): return ""
-
-# =================== CONFIG ===================
-AGENT_URL = os.getenv("CFOP_AGENT_URL", "").strip()  # deixe vazio para forçar fallback local
-AGENT_REQUIRED = os.getenv("CFOP_AGENT_REQUIRED", "false").lower() in {"1","true","yes"}
 
 # === Fallback de alíquotas PIS/COFINS ===
 # Observação: a UI (sidebar) pode sobrepor este valor em tempo de execução.
@@ -208,16 +203,12 @@ def _agent_healthcheck() -> tuple[bool, str]:
     if not AGENT_URL:
         return False, "AGENT_URL vazio"
     try:
-        ping_payload = {"emit_UF": "SP", "dest_UF": "SP", "CRT": "", "use_llm": False,
-                        "itens": [{"nItem": 1, "xProd": "ping", "CFOP": "5101", "NCM": "", "ICMS": {}}]}
-        _ = _http_post_json(AGENT_URL, ping_payload, timeout=5.0)
-        return True, "OK"
-    except urllib.error.HTTPError as e:
-        return False, f"HTTP {e.code}"
-    except urllib.error.URLError as e:
-        return False, f"URL_ERROR: {e.reason}"
+        r = requests.get(f"{AGENT_URL}/health", timeout=5)
+        return (r.ok, "OK" if r.ok else f"HTTP {r.status_code}")
+    except requests.HTTPError as e:
+        return False, f"HTTP {e.response.status_code}"
     except Exception as e:
-        return False, f"GENERIC_ERROR: {e}"
+        return False, f"ERROR: {e}"
 
 def _avaliar_produto_cfop_local(emit_UF: str, dest_UF: str, itens: list[dict]) -> dict:
     out, total = [], 0
@@ -290,16 +281,14 @@ def _consultar_agente_coerencia(ender_emit: dict, ender_dest: dict, emit: dict, 
             }
         })
 
+    # Se o agente estiver online, tenta o endpoint remoto; senão, cai no fallback local
     if agent_up and AGENT_URL:
         try:
-            return _http_post_json(AGENT_URL, payload, timeout=15.0)
+            return _http_post_json(f"{AGENT_URL}/classify", payload, timeout=15.0)
         except Exception as e:
-            if AGENT_REQUIRED:
-                return {"error": f"AGENT_REQUIRED_FAIL: {e}"}
+            # fallback local em caso de falha de rede/timeout
             return _avaliar_produto_cfop_local(emit_UF, dest_UF, itens)
     else:
-        if AGENT_REQUIRED:
-            return {"error": f"AGENT_REQUIRED_FAIL: {reason}"}
         return _avaliar_produto_cfop_local(emit_UF, dest_UF, itens)
 
 # ======== Fallback PIS/COFINS por regime ========
@@ -689,7 +678,8 @@ if st.session_state.get("nfe_results"):
             auditoria  = selecionada.get("auditoria", {}) or {}
             report  = {"mime": selecionada.get("mime"), "score": selecionada.get("score"), "ok": selecionada.get("ok")}
 
-            name =SelecionadaName= selecionada.get("arquivo","—")
+            # BUG FIX: variável
+            SelecionadaName = selecionada.get("arquivo","—")
             st.markdown(f"### {SelecionadaName}")
 
             cols = st.columns([1,1,1,1])
