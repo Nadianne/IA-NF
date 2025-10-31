@@ -1,6 +1,7 @@
 <img width="1570" height="826" alt="image" src="https://github.com/user-attachments/assets/7572e69b-fb55-453f-b4c3-580a15b78577" />
 
 # IA-NF — Agente de Validação de NF-e
+https://n97sxfqlvafvrvni5z3ykb.streamlit.app/
 
 O **IA-NF** é um agente que ajuda você a **analisar notas fiscais eletrônicas (NF-e em XML)** de forma rápida e clara.  
 Ele lê a nota, confere informações importantes (como CNPJ, chave e IE por UF), sugere **CFOP** e aponta **alertas de inconsistência** com explicações simples.
@@ -17,7 +18,7 @@ Ele lê a nota, confere informações importantes (como CNPJ, chave e IE por UF)
 
 ---
 
-## Para quem é
+## Para quem é?
 
 - Pessoas e equipes que **precisam conferir NF-e** com rapidez.
 - **Auditoria e conferência** de documentos, com foco em clareza e explicações.
@@ -31,7 +32,7 @@ Ele lê a nota, confere informações importantes (como CNPJ, chave e IE por UF)
 2. **Envie o arquivo XML** da NF-e.
 3. **Veja o painel de resultados** com os dados organizados.
 4. Confira **alertas, explicações e sugestões de CFOP**.
-5. **Baixe ou registre** o que for necessário (quando disponível).
+5. **Baixe o PDF** com o relatório sobre suas notas.
 
 > Dica: mantenha seus arquivos XML bem nomeados (ex.: `NF-12345.xml`) para achar tudo rápido.
 
