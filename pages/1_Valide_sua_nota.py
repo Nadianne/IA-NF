@@ -489,20 +489,7 @@ if st.button("🗑️ Limpar resultados", help="Remove resultados carregados e r
     st.experimental_rerun()
 
 # ======== Pedido CSV (opcional) ========
-pedido_file = st.file_uploader(
-    "Opcional: envie o **Pedido de Compra (CSV)** para reconciliação",
-    type=["csv"], accept_multiple_files=False,
-    help="Colunas: codigo,descricao,ncm,cfop,quantidade,vunit"
-)
-pedido_rows = []
-if pedido_file is not None:
-    try:
-        reader = csv.DictReader(io.StringIO(pedido_file.read().decode("utf-8")))
-        for row in reader:
-            pedido_rows.append({k.strip().lower(): (v or "").strip() for k, v in row.items()})
-        st.success(f"Pedido carregado com {len(pedido_rows)} linha(s).")
-    except Exception as e:
-        st.warning(f"Falha ao ler o pedido CSV: {e}")
+
 
 files = st.file_uploader(
     "Envie 1 ou mais arquivos **XML** de NF-e (procNFe/NFe)",
