@@ -9,6 +9,30 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import urllib.request, urllib.error
+# core/agent_client.py
+import os, requests, streamlit as st
+
+AGENT_URL = (st.secrets.get("AGENT_URL") or os.getenv("AGENT_URL") or "").rstrip("/")
+
+@st.cache_data(ttl=60)
+def ping_agent():
+    if not AGENT_URL:
+        return False, "AGENT_URL vazio (configure em Secrets)"
+    try:
+        r = requests.get(f"{AGENT_URL}/health", timeout=10)
+        return (r.ok, r.json() if r.headers.get("content-type","").startswith("application/json") else r.text)
+    except Exception as e:
+        return False, str(e)
+
+def classify_cfop(payload: dict) -> dict:
+    if not AGENT_URL:
+        return {"error": "AGENT_URL não configurado"}
+    try:
+        r = requests.post(f"{AGENT_URL}/classify", json=payload, timeout=30)
+        r.raise_for_status()
+        return r.json()
+    except Exception as e:
+        return {"error": f"{type(e).__name__}: {e}"}
 
 # ========================= Config =========================
 HF_TOKEN = os.getenv("HUGGINGFACE_API_KEY", "")
