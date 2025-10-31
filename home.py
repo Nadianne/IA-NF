@@ -1,6 +1,43 @@
 import streamlit as st, base64
+# --- imports no topo ---
+import os
+import requests
 
 st.set_page_config(page_title="Facilita NF", page_icon="🧾", layout="wide")
+
+
+AGENT_URL = (st.secrets.get("AGENT_URL") or os.getenv("AGENT_URL") or "").rstrip("/")
+
+@st.cache_data(ttl=60)
+def ping_agent():
+    if not AGENT_URL:
+        return False, "AGENT_URL vazio (configure em Secrets)"
+    try:
+        r = requests.get(f"{AGENT_URL}/health", timeout=10)
+        return (r.ok, (r.json() if r.headers.get("content-type","").startswith("application/json") else r.text))
+    except Exception as e:
+        return False, str(e)
+
+def classify_cfop(payload: dict) -> dict:
+    if not AGENT_URL:
+        return {"error": "AGENT_URL não configurado"}
+    try:
+        r = requests.post(f"{AGENT_URL}/classify", json=payload, timeout=30)
+        r.raise_for_status()
+        return r.json()
+    except Exception as e:
+        return {"error": f"{type(e).__name__}: {e}"}
+
+ok, info = ping_agent()
+st.sidebar.markdown("### Agente CFOP")
+if ok:
+    st.sidebar.success("Online ✅")
+    if isinstance(info, dict):
+        st.sidebar.code(info)
+else:
+    st.sidebar.error("Offline ❌")
+    st.sidebar.write(info)
+
 
 def img_b64(p):
     try:
