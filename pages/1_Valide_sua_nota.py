@@ -2,7 +2,7 @@
 # Compatível com Agente CFOP v1.4 + Classificação/Arquivamento
 from __future__ import annotations
 
-import streamlit as st, json, time, io, csv, zipfile, os, re
+import streamlit as st, json, time, io, zipfile, os, re
 import urllib.request, urllib.error
 from decimal import Decimal, InvalidOperation
 from typing import Optional
@@ -490,7 +490,7 @@ if st.button("🗑️ Limpar resultados", help="Remove resultados carregados e r
 
 # ======== Pedido CSV (opcional) ========
 
-
+pedido_rows = None 
 files = st.file_uploader(
     "Envie 1 ou mais arquivos **XML** de NF-e (procNFe/NFe)",
     type=["xml"], accept_multiple_files=True
