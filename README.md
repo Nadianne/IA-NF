@@ -45,6 +45,13 @@ Ele lê a nota, confere informações importantes (como CNPJ, chave e IE por UF)
 
 > Importante: este agente **não substitui** uma orientação fiscal/contábil oficial. Use os resultados como apoio à decisão.
 
+## Artefatos da Entrega
+Todos os artefatos oficiais (PDF, PPTX, MP4) estão em  
+[`Projeto Final - Artefatos`](./Projeto%20Final%20-%20Artefatos/).
+
+> Licença: **MIT** — veja o arquivo [LICENSE](./LICENSE).
+
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 MIT License
 
